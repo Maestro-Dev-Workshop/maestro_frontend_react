@@ -1,56 +1,48 @@
 import { useState } from 'react';
-import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { login } from '../../services/authService.js';
-import { loginSuccess } from '../../redux/slices/authSlice.js';
+import { login } from './authService';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const dispatch = useDispatch();
+  const [status, setStatus] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-  e.preventDefault();
-  try {
-    const res = await login(email, password);
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setStatus('Logging in...');
 
-    // Extract from nested structure: res.data.data
-    const { accessToken, refreshToken, user } = res.data;
-
-    dispatch(loginSuccess({
-      user,
-      token: accessToken,
-      refreshToken
-    }));
-
-    navigate('/');
-  } catch (err) {
-    alert('Login failed. Check credentials.');
-    console.error(err);
-  }
-};
-
+    try {
+      const res = await login({ email, password });
+      localStorage.setItem('access_token', res.data.access_token);
+      localStorage.setItem('refresh_token', res.data.refresh_token);
+      setStatus('Login successful!');
+      navigate('/');
+    } catch (err) {
+      console.error(err);
+      setStatus('Login failed. Please check your credentials.');
+    }
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md w-96">
-        <h2 className="text-xl font-semibold mb-4">Login</h2>
+    <div className="p-8 max-w-md mx-auto">
+      <h1 className="text-2xl font-bold mb-4">Login</h1>
+      <form onSubmit={handleLogin} className="space-y-4">
         <input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          className="w-full p-2 border rounded"
           required
-          className="w-full p-2 border mb-3 rounded"
         />
         <input
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          className="w-full p-2 border rounded"
           required
-          className="w-full p-2 border mb-4 rounded"
         />
         <button
           type="submit"
@@ -58,6 +50,7 @@ export default function LoginPage() {
         >
           Login
         </button>
+        {status && <p className="text-center text-gray-700">{status}</p>}
       </form>
     </div>
   );

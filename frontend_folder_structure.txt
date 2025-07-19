@@ -1,0 +1,47 @@
+src/
+├── features/
+│   ├── auth/
+│   │   ├── LoginPage.jsx                 # Login screen
+│   │   ├── SignupPage.jsx                # Signup screen
+│   │   └── authService.js                # Handles auth endpoints (login, signup, refresh, logout)
+│   │
+│   ├── dashboard/
+│   │   ├── DashboardPage.jsx             # List sessions and create session page
+│   │   └── dashboardService.js           # Handles session list, create session
+│   │
+│   ├── session-creation/
+│   │   ├── Step1SubjectMaterials.jsx     # Upload docs and label topics
+│   │   ├── Step2LessonGeneration.jsx     # Select topics, lesson preferences
+│   │   ├── Step3QuestionGeneration.jsx   # Specify exercise/exam preferences
+│   │   └── sessionCreationService.js     # Handles ingest-documents, label-documents, select-topics, generate-lesson, generate-exercises, generate-exam
+│   │
+│   ├── lesson/
+│   │   ├── LessonPage.jsx                # Parent shell with session sidebar
+│   │   ├── SubtopicView.jsx              # View single subtopic within topic
+│   │   ├── ExerciseView.jsx              # View question within exercise (within topic)
+│   │   ├── ExamView.jsx                  # View question within exam (session-level)
+│   │   ├── ChatbotSidebar.jsx            # Toggleable chatbot component
+│   │   └── lessonService.js              # Get topics, get topic content, mark subtopic read, get exercise, save exercise score, get exam, save exam score
+│   │
+│   └── common/
+│       ├── Sidebar.jsx                   # Reusable sidebar layout
+│       ├── Header.jsx                    # App header
+│       └── ProtectedRoute.jsx            # Auth-protected route wrapper
+│
+├── services/
+│   └── axiosConfig.js                    # Axios instance with interceptors
+│
+├── routes/
+│   └── AppRoutes.jsx                     # Route configuration
+│
+├── layout/
+│   └── MainLayout.jsx                    # General layout shell (if used globally)
+│
+├── hooks/
+│   └── useAuth.js                        # Auth token handling, user context
+│
+├── types/
+│   └── session.d.ts                      # Type definitions (only if you use TypeScript)
+│
+└── utils/
+    └── helpers.js                        # Generic reusable functions

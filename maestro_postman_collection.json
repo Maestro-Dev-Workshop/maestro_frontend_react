@@ -1,0 +1,888 @@
+{
+	"info": {
+		"_postman_id": "8de2f46f-739f-4003-a783-c0543d6a8434",
+		"name": "Maestro",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "37611721",
+		"_collection_link": "https://tbd888-2067.postman.co/workspace/TBD-Projects~6f030d25-a098-4f83-921e-563b8df26c54/collection/37611721-8de2f46f-739f-4003-a783-c0543d6a8434?action=share&source=collection_link&creator=37611721"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Sign Up",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "email",
+									"value": "blaze@gmail.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "qwerty12",
+									"type": "text"
+								},
+								{
+									"key": "first_name",
+									"value": "Blaze",
+									"type": "text"
+								},
+								{
+									"key": "last_name",
+									"value": "Master",
+									"type": "text"
+								},
+								{
+									"key": "date_of_birth",
+									"value": "2005-10-08",
+									"type": "text"
+								},
+								{
+									"key": "gender",
+									"value": "M",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/sign-up",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"sign-up"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "email",
+									"value": "blaze@gmail.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "qwerty12",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{refresh_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": []
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/refresh-token",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"refresh-token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "refresh_token",
+									"value": "{{access_token}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/logout",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Session",
+			"item": [
+				{
+					"name": "Create Session",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "name",
+									"value": "DGMs",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/session/create",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"session",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Ingest Documents",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "files",
+									"type": "file",
+									"src": "postman-cloud:///1f061623-b5b6-44e0-b704-0ac4ddd5f2c9"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/session/:session_id/docs/ingest",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"session",
+								":session_id",
+								"docs",
+								"ingest"
+							],
+							"variable": [
+								{
+									"key": "session_id",
+									"value": "{{session_id}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Label Documents",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": []
+						},
+						"url": {
+							"raw": "{{base_url}}/session/:session_id/docs/label",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"session",
+								":session_id",
+								"docs",
+								"label"
+							],
+							"variable": [
+								{
+									"key": "session_id",
+									"value": "{{session_id}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Select Topics",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"topics\": [\r\n        \"Introduction to Darwin Gödel Machine (DGM)\",\r\n        \"DGM Architecture and Mechanism\",\r\n        \"Benchmarks (SWE-bench, Polyglot)\",\r\n        \"AI Safety Considerations\",\r\n        \"Case Study: Addressing FM Hallucination\",\r\n        \"Objective Hacking\"\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/session/:session_id/select-topics",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"session",
+								":session_id",
+								"select-topics"
+							],
+							"variable": [
+								{
+									"key": "session_id",
+									"value": "{{session_id}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Generate Lesson",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "lesson_preference",
+									"value": "I like thinks to be simple, straightforward, and with examples",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/session/:session_id/generate-lesson",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"session",
+								":session_id",
+								"generate-lesson"
+							],
+							"variable": [
+								{
+									"key": "session_id",
+									"value": "{{session_id}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Generate Exercises",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"exercise_preference\": \"Give me practical questions\",\r\n    \"question_types\": [\"multiple choice\", \"multiple selection\", \"essay\"]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/session/:session_id/generate-exercises",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"session",
+								":session_id",
+								"generate-exercises"
+							],
+							"variable": [
+								{
+									"key": "session_id",
+									"value": "{{session_id}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Generate Exam",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"exam_preference\": \"I would like 20 questions that would really test my knowledge\",\r\n    \"question_types\": [\"multiple choice\", \"multiple selection\"],\r\n    \"use_time_limit\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/session/:session_id/generate-exam",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"session",
+								":session_id",
+								"generate-exam"
+							],
+							"variable": [
+								{
+									"key": "session_id",
+									"value": "{{session_id}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List User Sessions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/session/list",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"session",
+								"list"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Exam",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/session/:session_id/get-exam",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"session",
+								":session_id",
+								"get-exam"
+							],
+							"variable": [
+								{
+									"key": "session_id",
+									"value": "{{session_id}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Save Exam Score",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"exam_id\": \"3b4b661d-4de7-4cba-82a7-c0f7e04bcd6d\",\r\n    \"score\": 15\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/session/:session_id/save-exam-score",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"session",
+								":session_id",
+								"save-exam-score"
+							],
+							"variable": [
+								{
+									"key": "session_id",
+									"value": "{{session_id}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Topic",
+			"item": [
+				{
+					"name": "List Session Topics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/topic/:session_id/list",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"topic",
+								":session_id",
+								"list"
+							],
+							"variable": [
+								{
+									"key": "session_id",
+									"value": "{{session_id}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Topic Content",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/topic/:topic_id/get-content",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"topic",
+								":topic_id",
+								"get-content"
+							],
+							"variable": [
+								{
+									"key": "topic_id",
+									"value": "723ac529-63fb-431c-96a3-c591266b04ea",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Sub Topic as Read",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"subtopic_id\": \"1ebf1344-490b-44df-ba67-86e7a5a960ec\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/topic/:topic_id/mark-as-read",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"topic",
+								":topic_id",
+								"mark-as-read"
+							],
+							"variable": [
+								{
+									"key": "topic_id",
+									"value": "9934fc77-9c2c-4e46-8fd0-0a28ce2c0fdb",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Exercise",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/topic/:topic_id/get-exercise",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"topic",
+								":topic_id",
+								"get-exercise"
+							],
+							"variable": [
+								{
+									"key": "topic_id",
+									"value": "723ac529-63fb-431c-96a3-c591266b04ea",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Save Exercise Score",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"exercise_id\": \"94c5b615-fb87-4f05-b4b1-729911e7727a\",\r\n    \"score\": 4\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/topic/:topic_id/save-exercise-score",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"topic",
+								":topic_id",
+								"save-exercise-score"
+							],
+							"variable": [
+								{
+									"key": "topic_id",
+									"value": "9934fc77-9c2c-4e46-8fd0-0a28ce2c0fdb",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Chatbot",
+			"item": [
+				{
+					"name": "Get Chat History",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/chatbot/:session_id/chat-history",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"chatbot",
+								":session_id",
+								"chat-history"
+							],
+							"variable": [
+								{
+									"key": "session_id",
+									"value": "{{session_id}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Send Message",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"message\": \"Explain why this answer is correct\",\r\n    \"metadata\": {\r\n        \"topic_name\": \"DGM Architecture and Mechanism\",\r\n        \"topic_id\": \"723ac529-63fb-431c-96a3-c591266b04ea\",\r\n        \"sub_topic_name\": null,\r\n        \"sub_topic_id\": null,\r\n        \"exercise_id\": \"94c5b615-fb87-4f05-b4b1-729911e7727a\",\r\n        \"exam_id\": null,\r\n        \"question_id\": \"77044aec-d4f5-4744-a2bf-d13019d40b8d\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/chatbot/:session_id/send-message",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"chatbot",
+								":session_id",
+								"send-message"
+							],
+							"variable": [
+								{
+									"key": "session_id",
+									"value": "{{session_id}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Answer Essay Question",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "question_id",
+									"value": "eea5078f-1906-41e9-94df-7128355fa14c",
+									"type": "text"
+								},
+								{
+									"key": "answer",
+									"value": "It makes things better?",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/chatbot/answer-question",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"chatbot",
+								"answer-question"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Tool Endpoints for AI",
+			"item": [
+				{
+					"name": "Get Sub Topic Context",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/ai/context/subtopic/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"ai",
+								"context",
+								"subtopic",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "d033b7f7-52ab-4993-b1cd-80a49c945696"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Exercise Question Context",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/ai/context/exercise-question/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"ai",
+								"context",
+								"exercise-question",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "fdb2e69a-6a83-403e-a212-4e93bf23b9b0"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Exam Question Context",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/ai/context/exam-question/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"ai",
+								"context",
+								"exam-question",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "69150684-5675-4e30-8c31-e63f8f212498"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://34.45.73.160:5000/api",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU3MTg3NGMwLTczODctNDhlNC04MDY4LWZiYTQ4YzBjMTJlOCIsImVtYWlsIjoiYmxhemVAZ21haWwuY29tIiwiaWF0IjoxNzUyOTM5NTMwLCJleHAiOjE3NTI5NjExMzB9.aEfzIVzzMzsOHZwkqMe3zsS1LlIE_7hZz5a5CFTsW4g",
+			"type": "string"
+		},
+		{
+			"key": "refresh_token",
+			"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU3MTg3NGMwLTczODctNDhlNC04MDY4LWZiYTQ4YzBjMTJlOCIsImlhdCI6MTc1MjkzOTUzMCwiZXhwIjoxNzU0MjM1NTMwfQ.L-A9emePTaknxNjYWAmsF1ZJbQ8l7zhXkmWHuXvTdo0",
+			"type": "string"
+		},
+		{
+			"key": "user_id",
+			"value": "571874c0-7387-48e4-8068-fba48c0c12e8",
+			"type": "string"
+		},
+		{
+			"key": "session_id",
+			"value": "e38dda95-6b93-4965-800c-214da5051fac",
+			"type": "string"
+		},
+		{
+			"key": "topic_id",
+			"value": "723ac529-63fb-431c-96a3-c591266b04ea",
+			"type": "string"
+		}
+	]
+}
