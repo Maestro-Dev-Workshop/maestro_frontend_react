@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getExercise, saveExerciseScore } from './lessonService';
+import { getExercise, saveExerciseScore, scoreEssayAnswer } from './lessonService';
 
 const ExerciseView = () => {
     const { session_id, topic_id } = useParams();
@@ -18,7 +18,7 @@ const ExerciseView = () => {
             setLoading(true);
             try {
                 const data = await getExercise(topic_id);
-                setExercise(data);
+                setExercise(data.exercise);
             } catch (error) {
                 alert('Failed to load exercise');
             } finally {
@@ -29,24 +29,60 @@ const ExerciseView = () => {
         fetchExercise();
     }, [session_id, topic_id]);
 
-    const handleAnswerChange = (questionId, option) => {
-        setAnswers({ ...answers, [questionId]: option });
+    const handleAnswerChange = (questionId, value, type) => {
+        if (type === 'multiple selection') {
+            const currentAnswers = answers[questionId] || [];
+            if (currentAnswers.includes(value)) {
+                setAnswers({
+                    ...answers,
+                    [questionId]: currentAnswers.filter(ans => ans !== value)
+                });
+            } else {
+                setAnswers({
+                    ...answers,
+                    [questionId]: [...currentAnswers, value]
+                });
+            }
+        } else {
+            setAnswers({ ...answers, [questionId]: value });
+        }
     };
 
     const handleSubmit = async () => {
         if (!exercise?.questions?.length) return;
-
+    
         let correct = 0;
-        exercise.questions.forEach(q => {
-            if (answers[q.id] && answers[q.id] === q.correct_answer) correct++;
-        });
-        const finalScore = (correct / exercise.questions.length) * 100;
-        setScore(finalScore);
+    
+        for (const q of exercise.questions) {
+            const userAnswer = answers[q.id];
+    
+            if (q.type === 'multiple choice') {
+                const correctOption = q.options.find(opt => opt.correct);
+                if (userAnswer === correctOption?.text) correct++;
+            }
+    
+            if (q.type === 'multiple selection') {
+                const correctAnswers = q.options.filter(opt => opt.correct).map(opt => opt.text).sort();
+                const userAnswers = Array.isArray(userAnswer) ? userAnswer.sort() : [];
+                if (JSON.stringify(correctAnswers) === JSON.stringify(userAnswers)) correct++;
+            }            
+    
+            if (q.type === 'essay') {
+                try {
+                    const essayScore = await scoreEssayAnswer(q.id, userAnswer);
+                    if (essayScore?.result.correct) correct++; // Adjust according to backend response
+                } catch (err) {
+                    console.error('Essay scoring failed', err);
+                }
+            }
+        }
+    
+        setScore(correct);
         setSubmitted(true);
-
+    
         try {
-            await saveExerciseScore(topic_id, exercise.id, finalScore);
-            alert(`Exercise submitted. Score: ${finalScore.toFixed(2)}%`);
+            await saveExerciseScore(topic_id, exercise.exercise_id, correct);
+            alert(`Exercise submitted. Score: ${correct}`);
         } catch (err) {
             alert('Failed to save exercise score.');
         }
@@ -69,24 +105,59 @@ const ExerciseView = () => {
     return (
         <div>
             <h2>Exercise: Question {currentIndex + 1} of {exercise.questions.length}</h2>
-            <p><strong>{currentQuestion.question}</strong></p>
-            {currentQuestion.options.map((opt, idx) => (
-                <div key={idx}>
-                    <input
-                        type="radio"
-                        name={`q-${currentQuestion.id}`}
-                        value={opt}
-                        checked={answers[currentQuestion.id] === opt}
-                        onChange={() => handleAnswerChange(currentQuestion.id, opt)}
-                        disabled={submitted}
-                    />
-                    <label>{opt}</label>
-                </div>
-            ))}
+            <p><strong>{currentQuestion.text}</strong></p>
+
+            {currentQuestion.type === 'multiple choice' && (
+                currentQuestion.options.map((opt, idx) => (
+                    <div key={idx}>
+                        <input
+                            type="radio"
+                            name={`q-${currentQuestion.id}`}
+                            value={opt.text}
+                            checked={answers[currentQuestion.id] === opt.text}
+                            onChange={() => handleAnswerChange(currentQuestion.id, opt.text, currentQuestion.type)}
+                            disabled={submitted}
+                        />
+                        <label>{opt.text}</label>
+                    </div>
+                ))
+            )}
+
+            {currentQuestion.type === 'multiple selection' && (
+                currentQuestion.options.map((opt, idx) => (
+                    <div key={idx}>
+                        <input
+                            type="checkbox"
+                            name={`q-${currentQuestion.id}`}
+                            value={opt.text}
+                            checked={(answers[currentQuestion.id] || []).includes(opt.text)}
+                            onChange={() => handleAnswerChange(currentQuestion.id, opt.text, currentQuestion.type)}
+                            disabled={submitted}
+                        />
+                        <label>{opt.text}</label>
+                    </div>
+                ))
+            )}
+
+            {currentQuestion.type === 'essay' && (
+                <textarea
+                    rows="5"
+                    style={{ width: '100%' }}
+                    value={answers[currentQuestion.id] || ''}
+                    onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value, currentQuestion.type)}
+                    disabled={submitted}
+                />
+            )}
 
             <div style={{ marginTop: '20px' }}>
                 <button disabled={currentIndex === 0} onClick={() => handleNavigation('prev')}>Previous</button>
-                <button disabled={currentIndex === exercise.questions.length - 1} onClick={() => handleNavigation('next')} style={{ marginLeft: '10px' }}>Next</button>
+                <button
+                    disabled={currentIndex === exercise.questions.length - 1}
+                    onClick={() => handleNavigation('next')}
+                    style={{ marginLeft: '10px' }}
+                >
+                    Next
+                </button>
             </div>
 
             {!submitted && (
@@ -96,7 +167,10 @@ const ExerciseView = () => {
             )}
 
             {score !== null && (
-                <p style={{ marginTop: '20px' }}><strong>Score: {score.toFixed(2)}%</strong></p>
+                <div style={{ marginTop: '20px' }}>
+                    <p><strong>Score: {score}</strong></p>
+                    <button onClick={() => navigate(`/lesson/${session_id}`)}>Back to Lesson Overview</button>
+                </div>
             )}
         </div>
     );

@@ -4,12 +4,14 @@ import axios from '../services/axiosConfig';
 
 export default function useAuth() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Check if access token exists
   const checkAuth = useCallback(() => {
+    setLoading(true);
     const token = localStorage.getItem('access_token');
     setIsAuthenticated(!!token);
+    setLoading(false);
     return !!token;
   }, []);
 
@@ -30,5 +32,5 @@ export default function useAuth() {
 
   const getAccessToken = () => localStorage.getItem('access_token');
 
-  return { isAuthenticated, checkAuth, logout, getAccessToken };
+  return { isAuthenticated, loading, checkAuth, logout, getAccessToken };
 }

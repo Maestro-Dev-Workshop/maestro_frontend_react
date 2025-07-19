@@ -1,13 +1,16 @@
 // src/features/lesson/LessonPage.jsx
 import React, { useEffect, useState } from 'react';
 import { useParams, Outlet, useNavigate } from 'react-router-dom';
-import { getSessionTopics } from './lessonService';
+import { getSessionTopics, getTopicContent } from './lessonService';
 import ChatbotSidebar from './ChatbotSidebar';
 
 const LessonPage = () => {
     const { session_id } = useParams();
     const navigate = useNavigate();
+
     const [topics, setTopics] = useState([]);
+    const [subtopicsMap, setSubtopicsMap] = useState({});
+    const [expandedTopic, setExpandedTopic] = useState(null);
     const [showChat, setShowChat] = useState(false);
     const [loading, setLoading] = useState(true);
 
@@ -28,12 +31,38 @@ const LessonPage = () => {
         fetchTopics();
     }, [session_id]);
 
-    const handleTopicClick = (topicId) => {
-        navigate(`/lesson/${session_id}/topic/${topicId}`);
+    const toggleExpand = async (topicId) => {
+        if (expandedTopic === topicId) {
+            setExpandedTopic(null);
+            return;
+        }
+
+        setExpandedTopic(topicId);
+
+        if (!subtopicsMap[topicId]) {
+            try {
+                const topicContent = await getTopicContent(topicId);
+                setSubtopicsMap(prev => ({
+                    ...prev,
+                    [topicId]: topicContent.sub_topics || []
+                }));
+            } catch (error) {
+                console.error('Failed to load subtopics:', error);
+                alert('Unable to load subtopics. Please try again.');
+            }
+        }
     };
 
+    const handleSubtopicClick = (topicId, subtopicId) => {
+        navigate(`/session/${session_id}/lesson/topic/${topicId}/subtopic/${subtopicId}`);
+    };
+
+    const handleExerciseClick = (topicId) => {
+        navigate(`/session/${session_id}/lesson/topic/${topicId}/exercise`);
+    };
+    
     const handleExamClick = () => {
-        navigate(`/lesson/${session_id}/exam`);
+        navigate(`/session/${session_id}/lesson/exam`);
     };
 
     return (
@@ -50,19 +79,54 @@ const LessonPage = () => {
                     <p>Loading topics...</p>
                 ) : (
                     <ul style={{ listStyle: 'none', padding: 0 }}>
-                        {topics.map(topic => (
+                        {topics.map((topic) => (
                             <li key={topic.id}>
                                 <button
-                                    style={{ marginBottom: '8px', width: '100%' }}
-                                    onClick={() => handleTopicClick(topic.id)}
+                                    onClick={() => toggleExpand(topic.id)}
+                                    style={{
+                                        width: '100%',
+                                        marginBottom: '8px',
+                                        fontWeight: 'bold'
+                                    }}
                                 >
-                                    {topic.name}
+                                    {topic.title}
                                 </button>
+                                {expandedTopic === topic.id && (
+                                    <ul style={{ marginLeft: '15px', marginTop: '5px' }}>
+                                        {(subtopicsMap[topic.id] || []).map((sub) => (
+                                            <li key={sub.id}>
+                                                <button
+                                                    style={{ width: '100%', marginBottom: '5px' }}
+                                                    onClick={() => handleSubtopicClick(topic.id, sub.id)}
+                                                >
+                                                    {sub.title}
+                                                </button>
+                                            </li>
+                                        ))}
+                                        <li>
+                                            <button
+                                                style={{
+                                                    width: '100%',
+                                                    marginTop: '10px',
+                                                    fontWeight: 'bold'
+                                                }}
+                                                onClick={() => handleExerciseClick(topic.id)}
+                                            >
+                                                Exercise
+                                            </button>
+                                        </li>
+                                    </ul>
+                                )}
                             </li>
                         ))}
                         <li>
                             <button
-                                style={{ marginTop: '15px', width: '100%' }}
+                                style={{
+                                    width: '100%',
+                                    marginTop: '20px',
+                                    fontWeight: 'bold',
+                                    background: '#eee'
+                                }}
                                 onClick={handleExamClick}
                             >
                                 Exam
@@ -70,6 +134,7 @@ const LessonPage = () => {
                         </li>
                     </ul>
                 )}
+
                 <button
                     onClick={() => setShowChat(!showChat)}
                     style={{ marginTop: '20px', width: '100%' }}

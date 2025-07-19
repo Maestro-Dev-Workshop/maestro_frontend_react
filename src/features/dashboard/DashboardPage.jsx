@@ -25,15 +25,11 @@ const DashboardPage = () => {
     }, []);
 
     const handleStartSessionCreation = () => {
-        navigate('/session-creation/step-1');
+        navigate('/session/create/step-1');
     };
 
     const handleSessionClick = (session) => {
-        if (session.lesson_generated) {
-            navigate(`/lesson/${session.id}`);
-        } else {
-            navigate(`/session-creation/${session.id}/step-1`);
-        }
+        navigate(`/session/${session.id}/lesson`);
     };
 
     if (loading) return <p>Loading sessions...</p>;

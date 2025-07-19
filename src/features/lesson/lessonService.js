@@ -20,10 +20,10 @@ export const getExercise = async (topic_id) => {
 
 // ✅ Save exercise score
 export const saveExerciseScore = async (topic_id, exercise_id, score) => {
-    const res = await api.post(`/topic/${topic_id}/save-exercise-score`, {
+    const res = await api.post(`/topic/${topic_id}/save-exercise-score`, JSON.stringify({
         exercise_id,
         score
-    });
+    }));
     return res.data;
 };
 
@@ -48,6 +48,22 @@ export const sendChatMessage = async (session_id, message, metadata) => {
         message,
         metadata
     });
+    return res.data;
+};
+
+export const scoreEssayAnswer = async (question_id, answer) => {
+    const res = await api.post(
+        '/chatbot/answer-question',
+        new URLSearchParams({
+            question_id,
+            answer
+        }),
+        {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        }
+    );
     return res.data;
 };
 

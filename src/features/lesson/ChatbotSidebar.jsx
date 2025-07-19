@@ -1,4 +1,3 @@
-// src/features/lesson/ChatbotSidebar.jsx
 import React, { useEffect, useState } from 'react';
 import { getChatHistory, sendChatMessage } from './lessonService';
 
@@ -7,14 +6,20 @@ const ChatbotSidebar = ({ sessionId, metadata = {} }) => {
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
 
-    // Fetch chat history on load
+    // ✅ Fetch and format chat history on load
     useEffect(() => {
         const fetchChatHistory = async () => {
             try {
                 const res = await getChatHistory(sessionId);
-                if (res?.messages) setMessages(res.messages);
+                if (res?.history) {
+                    const formatted = res.history.map(h => ({
+                        role: h.sender === 'assistant' ? 'bot' : 'user',
+                        content: h.message
+                    }));
+                    setMessages(formatted);
+                }
             } catch (err) {
-                console.error('Failed to load chat history');
+                console.error('Failed to load chat history', err);
             }
         };
         fetchChatHistory();
@@ -24,16 +29,17 @@ const ChatbotSidebar = ({ sessionId, metadata = {} }) => {
         if (!input.trim()) return;
 
         const userMessage = { role: 'user', content: input };
-        setMessages((prev) => [...prev, userMessage]);
+        setMessages(prev => [...prev, userMessage]);
         setLoading(true);
 
         try {
             const response = await sendChatMessage(sessionId, input, metadata);
-            const botMessage = { role: 'bot', content: response.message };
-            setMessages((prev) => [...prev, botMessage]);
+            const botMessage = { role: 'bot', content: response?.response || 'No response from bot.' };
+            setMessages(prev => [...prev, botMessage]);
         } catch (err) {
+            console.error('Chatbot error', err);
             const errorMessage = { role: 'bot', content: 'Failed to get a response.' };
-            setMessages((prev) => [...prev, errorMessage]);
+            setMessages(prev => [...prev, errorMessage]);
         } finally {
             setInput('');
             setLoading(false);

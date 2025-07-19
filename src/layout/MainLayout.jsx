@@ -7,12 +7,12 @@ const MainLayout = ({ sidebarLinks = [], title = "Maestro", onLogout }) => {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
             <Header title={title} onLogout={onLogout} />
-            <div style={{ display: 'flex', flex: 1 }}>
+            {/* <div style={{ display: 'flex', flex: 1 }}>
                 <Sidebar links={sidebarLinks} />
                 <div style={{ flex: 1, padding: '20px', overflowY: 'auto' }}>
-                    <Outlet />
                 </div>
-            </div>
+            </div> */}
+            <Outlet />
         </div>
     );
 };

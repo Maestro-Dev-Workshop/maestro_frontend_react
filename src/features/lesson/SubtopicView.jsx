@@ -1,10 +1,9 @@
-// src/features/lesson/SubtopicView.jsx
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getTopicContent, markSubtopicAsRead } from './lessonService';
 
 const SubtopicView = () => {
-    const { topic_id, sub_topic_id } = useParams();
+    const { topic_id, subtopic_id } = useParams();
     const [subtopic, setSubtopic] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -14,14 +13,12 @@ const SubtopicView = () => {
             try {
                 const topicData = await getTopicContent(topic_id);
                 const foundSubtopic = topicData.sub_topics?.find(
-                    (sub) => sub.id === sub_topic_id
+                    (sub) => sub.id === subtopic_id
                 );
 
                 if (foundSubtopic) {
                     setSubtopic(foundSubtopic);
-
-                    // Mark as read after successful fetch
-                    await markSubtopicAsRead(topic_id, sub_topic_id);
+                    await markSubtopicAsRead(topic_id, subtopic_id);
                 } else {
                     alert('Subtopic not found');
                 }
@@ -34,17 +31,20 @@ const SubtopicView = () => {
         };
 
         fetchSubtopic();
-    }, [topic_id, sub_topic_id]);
+    }, [topic_id, subtopic_id]);
 
     if (loading) return <p>Loading subtopic...</p>;
     if (!subtopic) return <p>No content found for this subtopic.</p>;
 
     return (
         <div>
-            <h2>{subtopic.name}</h2>
-            <div style={{ marginBottom: '20px' }}>
-                <p>{subtopic.text_content}</p>
-            </div>
+            <h2 style={{ marginBottom: '15px', fontWeight: 'bold' }}>{subtopic.title}</h2>
+
+            {subtopic.text_content && (
+                <div style={{ marginBottom: '20px' }}>
+                    <p>{subtopic.text_content}</p>
+                </div>
+            )}
 
             {subtopic.image_content?.length > 0 && (
                 <div style={{ marginBottom: '20px' }}>
