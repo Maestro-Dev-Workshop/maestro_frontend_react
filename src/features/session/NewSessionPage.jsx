@@ -1,12 +1,14 @@
 import { useState } from 'react';
-import { createSession, uploadDocuments } from '../../services/sessionService';
+import { createSession, uploadDocuments, labelDocuments } from '../../services/sessionService';
 import { useNavigate } from 'react-router-dom';
 
 export default function NewSessionPage() {
   const [name, setName] = useState('');
   const [sessionId, setSessionId] = useState(null);
+  const [stage, setStage] = useState('create'); // 'create', 'upload', 'label'
   const [files, setFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
+  const [labeling, setLabeling] = useState(false);
   const [status, setStatus] = useState('');
   const navigate = useNavigate();
 
@@ -15,6 +17,7 @@ export default function NewSessionPage() {
       const res = await createSession(name);
       console.log('Session creation response:', res.data);
       setSessionId(res.data.session.id); // assuming the backend returns this key
+      setStage('upload');
       setStatus('Session created. Now upload your documents.');
     } catch {
       setStatus('Failed to create session.');
@@ -26,27 +29,45 @@ export default function NewSessionPage() {
     try {
       setUploading(true);
       await uploadDocuments(sessionId, files);
-      setStatus('Documents uploaded. Redirecting...');
-      setTimeout(() => navigate(`/session/${sessionId}/topics`), 1500);
+      setStage('label')
+      setStatus('Documents uploaded. Now label your documents.');
     } catch {
       setStatus('Upload failed');
     } finally {
       setUploading(false);
     }
   };
+  
+  const handleLabel = async () => {
+    if (!sessionId) return;
+    try {
+      setLabeling(true);
+      await labelDocuments(sessionId);
+      setStatus('Documents labeled. You can now select topics.');
+      setTimeout(() => navigate(`/session/${sessionId}/topics`), 1500);
+    } catch {
+      setStatus('Labeling failed');
+    } finally {
+      setLabeling(false);
+    }
+  }
 
   return (
     <div className="p-8">
       <h1 className="text-2xl font-bold mb-4">Start New Session</h1>
 
-      {!sessionId ? (
-        <>
+      {/* If stage is 'create', prompt for session name and create button
+      If stage is 'upload', prompt for file upload and upload button
+      If stage is 'label', prompt for labeling documents and next button */}
+
+      {stage === 'create' && (
+        <div>
           <input
             type="text"
-            placeholder="Session name"
+            placeholder="Session Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="border p-2 rounded w-full max-w-md mb-4"
+            className="border p-2 mb-4 w-full"
           />
           <button
             onClick={handleCreate}
@@ -54,8 +75,9 @@ export default function NewSessionPage() {
           >
             Create Session
           </button>
-        </>
-      ) : (
+        </div>
+      )}
+      {stage === 'upload' && (
         <>
           <p className="mb-2">Upload your documents:</p>
           <input
@@ -73,6 +95,20 @@ export default function NewSessionPage() {
           </button>
         </>
       )}
+      {stage === 'label' && (
+        <>
+          <p className="mb-2">Label your documents:</p>
+          <button
+            onClick={handleLabel}
+            disabled={labeling}
+            className="bg-yellow-600 text-white px-4 py-2 rounded"
+          >
+            {labeling ? 'Labeling...' : 'Label Documents'}
+          </button>
+        </>
+      )}
+
+      {/* Status message */}
 
       {status && <p className="mt-4 text-gray-600">{status}</p>}
     </div>

@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 export default function DashboardPage() {
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
+  console.log(sessions.length)
 
   useEffect(() => {
     const fetchSessions = async () => {
