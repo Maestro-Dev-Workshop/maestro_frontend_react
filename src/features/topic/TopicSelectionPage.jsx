@@ -13,7 +13,7 @@ export default function TopicSelectionPage() {
     const fetchTopics = async () => {
       try {
         const res = await getTopics(sessionId);
-        setTopics(res.data);
+        setTopics(res.data.topics);
       } catch {
         setStatus('Failed to load topics');
       }
@@ -28,16 +28,19 @@ export default function TopicSelectionPage() {
   };
 
   const handleSubmit = async () => {
+  if (!topics.length) return;
     try {
-      setStatus('Generating lesson...');
-      await selectTopics(sessionId, selected);
-      const res = await generateLesson(sessionId);
-      setLesson(res.data.lesson);
-      setStatus('');
-    } catch {
-      setStatus('Failed to generate lesson');
-    }
-  };
+    // const topicNames = selectedTopics.map((t) => t.name); // or t.value if using react-select
+    // console.log('Topics being submitted:', topicNames);
+
+    await labelDocuments(sessionId);
+    navigate(`/session/${sessionId}/exercises`);
+  } catch (err) {
+    console.error('Labeling failed:', err.response?.data || err.message);
+    alert('Failed to submit topics. Make sure at least one is selected.');
+  }
+};
+
 
   return (
     <div className="p-8">

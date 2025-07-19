@@ -1,71 +1,80 @@
 import { useState } from 'react';
-import { createSession, uploadDocuments } from '../../services/sessionService.js';
+import { createSession, uploadDocuments } from '../../services/sessionService';
+import { useNavigate } from 'react-router-dom';
 
 export default function NewSessionPage() {
   const [name, setName] = useState('');
   const [sessionId, setSessionId] = useState(null);
   const [files, setFiles] = useState([]);
+  const [uploading, setUploading] = useState(false);
   const [status, setStatus] = useState('');
+  const navigate = useNavigate();
 
   const handleCreate = async () => {
-    setStatus('Creating session...');
     try {
       const res = await createSession(name);
-      setSessionId(res.data.id);
-      setStatus('Session created. Upload documents.');
+      console.log('Session creation response:', res.data);
+      setSessionId(res.data.session.id); // assuming the backend returns this key
+      setStatus('Session created. Now upload your documents.');
     } catch {
       setStatus('Failed to create session.');
     }
   };
 
   const handleUpload = async () => {
-    if (!files.length) return;
-    setStatus('Uploading documents...');
+    if (!files.length || !sessionId) return;
     try {
+      setUploading(true);
       await uploadDocuments(sessionId, files);
-      setStatus('Documents uploaded successfully.');
+      setStatus('Documents uploaded. Redirecting...');
+      setTimeout(() => navigate(`/session/${sessionId}/topics`), 1500);
     } catch {
-      setStatus('Upload failed.');
+      setStatus('Upload failed');
+    } finally {
+      setUploading(false);
     }
   };
 
   return (
-    <div className="min-h-screen p-8 bg-gray-50">
-      <h1 className="text-2xl font-bold mb-4">Create New Session</h1>
-      <div className="mb-4">
-        <input
-          type="text"
-          placeholder="Session Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="p-2 border rounded w-full max-w-md"
-        />
-        <button
-          onClick={handleCreate}
-          className="mt-2 bg-blue-600 text-white px-4 py-2 rounded"
-        >
-          Create Session
-        </button>
-      </div>
+    <div className="p-8">
+      <h1 className="text-2xl font-bold mb-4">Start New Session</h1>
 
-      {sessionId && (
-        <div className="mt-6">
+      {!sessionId ? (
+        <>
+          <input
+            type="text"
+            placeholder="Session name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="border p-2 rounded w-full max-w-md mb-4"
+          />
+          <button
+            onClick={handleCreate}
+            className="bg-blue-600 text-white px-4 py-2 rounded"
+          >
+            Create Session
+          </button>
+        </>
+      ) : (
+        <>
+          <p className="mb-2">Upload your documents:</p>
           <input
             type="file"
             multiple
             onChange={(e) => setFiles([...e.target.files])}
-            className="block mb-2"
+            className="mb-4"
           />
           <button
             onClick={handleUpload}
+            disabled={uploading}
             className="bg-green-600 text-white px-4 py-2 rounded"
           >
-            Upload Documents
+            {uploading ? 'Uploading...' : 'Upload'}
           </button>
-        </div>
+        </>
       )}
 
-      {status && <p className="mt-4 text-gray-700">{status}</p>}
+      {status && <p className="mt-4 text-gray-600">{status}</p>}
     </div>
   );
 }

@@ -9,16 +9,24 @@ export default function ChatbotPage() {
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    const fetchHistory = async () => {
-      try {
-        const res = await getChatHistory(sessionId);
-        setMessages(res.data);
-      } catch {
-        console.error('Failed to load chat history');
-      }
-    };
-    fetchHistory();
-  }, [sessionId]);
+  const fetchHistory = async () => {
+    try {
+      const res = await getChatHistory(sessionId);
+      console.log('Chatbot sessionId:', sessionId);
+
+      const chatArray = Array.isArray(res.data.chat)
+        ? res.data.chat
+        : Array.isArray(res.data)
+        ? res.data
+        : [];
+      setMessages(chatArray);
+    } catch {
+      console.error('Failed to load chat history');
+    }
+  };
+  fetchHistory();
+}, [sessionId]);
+
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -29,8 +37,9 @@ export default function ChatbotPage() {
       const res = await sendMessage(sessionId, input);
       const botMessage = { sender: 'bot', message: res.data.response, time: new Date().toISOString() };
       setMessages((prev) => [...prev, botMessage]);
-    } catch {
-      console.error('Message failed');
+    } catch (err) {
+      console.error('Chatbot failed:', err.response?.data || err.message);
+      alert('Chatbot failed to respond. Make sure you have uploaded and processed documents.');
     }
   };
 

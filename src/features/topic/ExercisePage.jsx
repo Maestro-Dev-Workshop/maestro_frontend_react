@@ -13,7 +13,7 @@ export default function ExercisePage() {
     const fetchExercise = async () => {
       try {
         const res = await getExercise(topicId);
-        setQuestions(res.data);
+        setQuestions(res.data.setQuestions);
       } catch {
         setStatus('Failed to load exercise');
       }

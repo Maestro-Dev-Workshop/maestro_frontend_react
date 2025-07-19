@@ -12,7 +12,7 @@ export default function ExamPage() {
     const fetchExam = async () => {
       try {
         const res = await getExam(sessionId);
-        setQuestions(res.data);
+        setQuestions(res.data.setQuestions);
       } catch {
         setStatus('Failed to load exam');
       }

@@ -10,7 +10,8 @@ export default function DashboardPage() {
     const fetchSessions = async () => {
       try {
         const res = await getUserSessions();
-        setSessions(res.data);
+        setSessions(res.data.sessions);
+        console.log('session list response:', res.data);
       } catch (err) {
         alert('Failed to load sessions');
       } finally {
@@ -22,9 +23,6 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen p-8 bg-gray-50">
-    <h1 className="text-3xl text-blue-600 font-bold underline">
-  Tailwind Is Working
-</h1>
       <h1 className="text-2xl font-bold mb-6">My Sessions</h1>
       {loading ? (
         <p>Loading...</p>

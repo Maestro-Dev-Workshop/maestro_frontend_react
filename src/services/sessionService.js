@@ -15,3 +15,16 @@ export const uploadDocuments = (sessionId, files) => {
   }
   return API.post(`/session/${sessionId}/docs/ingest`, formData);
 };
+
+export const labelDocuments = (sessionId) => {
+  const formData = new URLSearchParams();
+  //topics.forEach((t) => formData.append('topics', t));
+  return API.post(`/session/${sessionId}/docs/label`, formData);
+};
+
+
+export const selectTopics = (sessionId, topics) =>
+  API.post(`/session/${sessionId}/select-topics`, {
+    topics, // ✅ this must be an array of strings
+  });
+

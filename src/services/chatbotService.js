@@ -6,8 +6,12 @@ export const getChatHistory = (sessionId) =>
 export const sendMessage = (sessionId, message) =>
   API.post(`/chatbot/${sessionId}/send-message`, {
     message,
-    metadata: {},
+    metadata: {
+      source: 'web',
+      timestamp: Date.now()
+    }
   });
+
 
 export const submitEssayAnswer = (questionId, answer) => {
   const formData = new URLSearchParams();

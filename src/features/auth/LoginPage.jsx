@@ -11,19 +11,26 @@ export default function LoginPage() {
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await login(email, password);
-      dispatch(loginSuccess({
-        user: res.data.user,
-        token: res.data.access_token,
-        refreshToken: res.data.refresh_token,
-      }));
-      navigate('/');
-    } catch (err) {
-      alert('Login failed. Check credentials.');
-    }
-  };
+  e.preventDefault();
+  try {
+    const res = await login(email, password);
+
+    // Extract from nested structure: res.data.data
+    const { accessToken, refreshToken, user } = res.data;
+
+    dispatch(loginSuccess({
+      user,
+      token: accessToken,
+      refreshToken
+    }));
+
+    navigate('/');
+  } catch (err) {
+    alert('Login failed. Check credentials.');
+    console.error(err);
+  }
+};
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
