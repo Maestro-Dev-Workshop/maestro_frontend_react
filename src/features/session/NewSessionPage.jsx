@@ -42,9 +42,13 @@ export default function NewSessionPage() {
     if (!sessionId) return;
     try {
       setLabeling(true);
-      await labelDocuments(sessionId);
-      setStatus('Documents labeled. You can now select topics.');
-      setTimeout(() => navigate(`/session/${sessionId}/topics`), 1500);
+      const res = await labelDocuments(sessionId);
+      const topics = res.data.topics;
+
+      navigate(`/session/${sessionId}/topics`, {
+      state: { topics }, // ✅ pass topics via route state
+    });
+
     } catch {
       setStatus('Labeling failed');
     } finally {

@@ -1,25 +1,36 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { getTopics, selectTopics, generateLesson } from '../../services/topicService.js';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { getTopics } from '../../services/topicService.js';
+import { labelDocuments } from '../../services/sessionService.js'; // ✅ Import this
 
 export default function TopicSelectionPage() {
   const { sessionId } = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  
   const [topics, setTopics] = useState([]);
   const [selected, setSelected] = useState([]);
-  const [lesson, setLesson] = useState(null);
   const [status, setStatus] = useState('');
+  const [lesson, setLesson] = useState(null);
 
   useEffect(() => {
-    const fetchTopics = async () => {
-      try {
-        const res = await getTopics(sessionId);
-        setTopics(res.data.topics);
-      } catch {
-        setStatus('Failed to load topics');
-      }
-    };
-    fetchTopics();
-  }, [sessionId]);
+    if (location.state?.topics) {
+    setTopics(location.state.topics);
+    return;
+  }
+
+  const fetchTopics = async () => {
+    try {
+      const res = await getTopics(sessionId);
+      setTopics(res.data.topics);
+    } catch {
+      setStatus('Failed to load topics');
+    }
+  };
+
+  fetchTopics();
+}, [sessionId, location.state]);
 
   const handleToggle = (topic) => {
     setSelected((prev) =>
@@ -28,23 +39,25 @@ export default function TopicSelectionPage() {
   };
 
   const handleSubmit = async () => {
-  if (!topics.length) return;
+    if (!selected.length) {
+      alert('Please select at least one topic.');
+      return;
+    }
+
     try {
-    // const topicNames = selectedTopics.map((t) => t.name); // or t.value if using react-select
-    // console.log('Topics being submitted:', topicNames);
-
-    await labelDocuments(sessionId);
-    navigate(`/session/${sessionId}/exercises`);
-  } catch (err) {
-    console.error('Labeling failed:', err.response?.data || err.message);
-    alert('Failed to submit topics. Make sure at least one is selected.');
-  }
-};
-
+      console.log('Submitting selected topics:', selected);
+      await labelDocuments(sessionId, selected); // ✅ Send selected as array of strings
+      navigate(`/session/${sessionId}/exercises`);
+    } catch (err) {
+      console.error('Labeling failed:', err.response?.data || err.message);
+      alert('Failed to submit topics. Make sure at least one is selected.');
+    }
+  };
 
   return (
     <div className="p-8">
       <h1 className="text-2xl font-bold mb-4">Select Topics</h1>
+
       <div className="mb-4">
         {topics.map((topic) => (
           <label key={topic} className="block">
@@ -59,6 +72,7 @@ export default function TopicSelectionPage() {
           </label>
         ))}
       </div>
+
       <button
         onClick={handleSubmit}
         className="bg-blue-600 text-white px-4 py-2 rounded"

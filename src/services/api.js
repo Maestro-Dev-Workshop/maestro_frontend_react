@@ -3,6 +3,7 @@ import store from '../redux/store.js';
 
 const API = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
+  timeout: 300000, 
 });
 
 API.interceptors.request.use((config) => {
