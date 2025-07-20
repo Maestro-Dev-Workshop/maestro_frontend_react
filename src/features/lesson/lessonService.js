@@ -53,18 +53,7 @@ export const sendChatMessage = async (session_id, message, metadata) => {
 };
 
 export const scoreEssayAnswer = async (question_id, answer) => {
-    const res = await api.post(
-        '/chatbot/answer-question',
-        new URLSearchParams({
-            question_id,
-            answer
-        }),
-        {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
-        }
-    );
+    const res = await api.post('/chatbot/answer-question', { question_id, answer});
     return res.data;
 };
 
