@@ -20,10 +20,10 @@ export const getExercise = async (topic_id) => {
 
 // ✅ Save exercise score
 export const saveExerciseScore = async (topic_id, exercise_id, score) => {
-    const res = await api.post(`/topic/${topic_id}/save-exercise-score`, JSON.stringify({
+    const res = await api.post(`/topic/${topic_id}/save-exercise-score`, {
         exercise_id,
         score
-    }));
+    });
     return res.data;
 };
 
@@ -44,6 +44,7 @@ export const saveExamScore = async (session_id, exam_id, score) => {
 
 // ✅ Send message to chatbot
 export const sendChatMessage = async (session_id, message, metadata) => {
+    console.log(session_id, message, metadata);
     const res = await api.post(`/chatbot/${session_id}/send-message`, {
         message,
         metadata

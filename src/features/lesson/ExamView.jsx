@@ -12,6 +12,8 @@ const ExamView = () => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [submitted, setSubmitted] = useState(false);
     const [score, setScore] = useState(null);
+    const [questionCorrectness, setQuestionCorrectness] = useState({});
+    const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
         const fetchExam = async () => {
@@ -50,34 +52,46 @@ const ExamView = () => {
 
     const handleSubmit = async () => {
         if (!exam?.questions?.length) return;
+        setSubmitting(true);
 
         let correct = 0;
+        const correctnessMap = {};
 
         for (const q of exam.questions) {
             const userAnswer = answers[q.id];
-            console.log(userAnswer)
 
             if (q.type === 'multiple choice') {
                 const correctOption = q.options.find(opt => opt.correct);
-                if (userAnswer === correctOption?.text) correct++;
+                const isCorrect = userAnswer === correctOption?.text;
+                if (isCorrect) correct++;
+                correctnessMap[q.id] = isCorrect;
             }
 
             if (q.type === 'multiple selection') {
                 const correctAnswers = q.options.filter(opt => opt.correct).map(opt => opt.text).sort();
                 const userAnswers = Array.isArray(userAnswer) ? userAnswer.sort() : [];
-                if (JSON.stringify(correctAnswers) === JSON.stringify(userAnswers)) correct++;
-            }            
+                const isCorrect = JSON.stringify(correctAnswers) === JSON.stringify(userAnswers);
+                if (isCorrect) correct++;
+                correctnessMap[q.id] = isCorrect;
+            }
 
             if (q.type === 'essay') {
                 try {
                     const essayScore = await scoreEssayAnswer(q.id, userAnswer);
-                    if (essayScore?.result.correct) correct++;
+                    const isCorrect = essayScore?.result.correct;
+                    if (isCorrect) correct++;
+                    correctnessMap[q.id] = {
+                        correct: isCorrect,
+                        feedback: essayScore?.result.feedback
+                    };
                 } catch (err) {
                     console.error('Essay scoring failed', err);
+                    correctnessMap[q.id] = { correct: false, feedback: 'Error scoring essay.' };
                 }
             }
         }
 
+        setQuestionCorrectness(correctnessMap);
         setScore(correct);
         setSubmitted(true);
 
@@ -86,6 +100,8 @@ const ExamView = () => {
             alert(`Exam submitted. Score: ${correct} / ${exam.questions.length}`);
         } catch (err) {
             alert('Failed to save exam score.');
+        } finally {
+            setSubmitting(false);
         }
     };
 
@@ -110,7 +126,7 @@ const ExamView = () => {
 
             {currentQuestion.type === 'multiple choice' && (
                 currentQuestion.options.map((opt, idx) => (
-                    <div key={idx}>
+                    <label key={idx} style={{ display: 'flex', alignItems: 'center', marginBottom: '8px', marginTop: '8px' }}>
                         <input
                             type="radio"
                             name={`q-${currentQuestion.id}`}
@@ -118,15 +134,16 @@ const ExamView = () => {
                             checked={answers[currentQuestion.id] === opt.text}
                             onChange={() => handleAnswerChange(currentQuestion.id, opt.text, currentQuestion.type)}
                             disabled={submitted}
+                            style={{ marginRight: '8px', width: '20px' }}
                         />
-                        <label>{opt.text}</label>
-                    </div>
+                        {opt.text}
+                    </label>
                 ))
             )}
 
             {currentQuestion.type === 'multiple selection' && (
                 currentQuestion.options.map((opt, idx) => (
-                    <div key={idx}>
+                    <label key={idx} style={{ display: 'flex', alignItems: 'center', marginBottom: '8px', marginTop: '8px' }}>
                         <input
                             type="checkbox"
                             name={`q-${currentQuestion.id}`}
@@ -134,9 +151,10 @@ const ExamView = () => {
                             checked={(answers[currentQuestion.id] || []).includes(opt.text)}
                             onChange={() => handleAnswerChange(currentQuestion.id, opt.text, currentQuestion.type)}
                             disabled={submitted}
+                            style={{ marginRight: '8px', width: '20px' }}
                         />
-                        <label>{opt.text}</label>
-                    </div>
+                        {opt.text}
+                    </label>
                 ))
             )}
 
@@ -148,6 +166,54 @@ const ExamView = () => {
                     onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value, currentQuestion.type)}
                     disabled={submitted}
                 />
+            )}
+
+            {submitted && (
+                <p style={{
+                    marginTop: '10px',
+                    fontWeight: 'bold',
+                    color:
+                        currentQuestion.type === 'essay'
+                            ? questionCorrectness[currentQuestion.id]?.correct
+                                ? 'green'
+                                : 'red'
+                            : questionCorrectness[currentQuestion.id]
+                                ? 'green'
+                                : 'red'
+                }}>
+                    {
+                        currentQuestion.type === 'essay'
+                            ? questionCorrectness[currentQuestion.id]?.correct
+                                ? 'Correct'
+                                : 'Incorrect'
+                            : questionCorrectness[currentQuestion.id]
+                                ? 'Correct'
+                                : 'Incorrect'
+                    }
+                </p>
+            )}
+
+            {submitted && currentQuestion.type === 'multiple choice' && (
+                <p style={{ fontStyle: 'italic', marginTop: '5px' }}>
+                    Explanation: {currentQuestion.options.find(opt => opt.correct)?.explanation}
+                </p>
+            )}
+
+            {submitted && currentQuestion.type === 'multiple selection' && (
+                <div style={{ fontStyle: 'italic', marginTop: '5px' }}>
+                    <p><strong>Explanations:</strong></p>
+                    {currentQuestion.options.map((opt, idx) => (
+                        <p key={idx} style={{ marginBottom: '5px' }}>
+                            <span style={{ fontWeight: 'bold' }}>{opt.text}:</span> {opt.explanation}
+                        </p>
+                    ))}
+                </div>
+            )}
+
+            {submitted && currentQuestion.type === 'essay' && (
+                <p style={{ fontStyle: 'italic', marginTop: '5px' }}>
+                    Feedback: {questionCorrectness[currentQuestion.id]?.feedback}
+                </p>
             )}
 
             <div style={{ marginTop: '20px' }}>
@@ -163,7 +229,9 @@ const ExamView = () => {
 
             {!submitted && (
                 <div style={{ marginTop: '20px' }}>
-                    <button onClick={handleSubmit}>Submit Exam</button>
+                    <button onClick={handleSubmit} disabled={submitting}>
+                        {submitting ? 'Submitting...' : 'Submit Exam'}
+                    </button>
                 </div>
             )}
 

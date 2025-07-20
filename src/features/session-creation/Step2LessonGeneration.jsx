@@ -1,18 +1,16 @@
-// src/features/session-creation/Step2LessonGeneration.jsx
 import React, { useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { generateLesson } from './sessionCreationService';
+import { generateLesson, selectTopics } from './sessionCreationService';
 
 const Step2LessonGeneration = () => {
-    const { sessionId } = useParams();
+    const { session_id } = useParams();
     const navigate = useNavigate();
     const location = useLocation();
     const identifiedTopics = location.state?.topics || [];
 
-    const [selectedTopics, setSelectedTopics] = useState(identifiedTopics.map(topic => ({
-        name: topic,
-        selected: true
-    })));
+    const [selectedTopics, setSelectedTopics] = useState(
+        identifiedTopics.map(topic => ({ name: topic, selected: true }))
+    );
     const [lessonPreference, setLessonPreference] = useState('');
     const [loading, setLoading] = useState(false);
 
@@ -31,22 +29,13 @@ const Step2LessonGeneration = () => {
 
         setLoading(true);
         try {
-            // First select topics
-            await fetch(`${import.meta.env.VITE_API_URL}/session/${sessionId}/select-topics`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-                },
-                body: JSON.stringify({ topics: topicsToSend })
-            });
-
-            // Then generate lesson
-            await generateLesson(sessionId, lessonPreference);
+            await selectTopics(session_id, topicsToSend);
+            await generateLesson(session_id, lessonPreference);
             alert('Lesson generated successfully!');
-            navigate(`/session-creation/${sessionId}/step-3`);
+            navigate(`/session/create/step-3/${session_id}`);
         } catch (error) {
-            alert('Failed to generate lesson.');
+            console.error('Lesson generation failed:', error);
+            alert('Failed to generate lesson. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -58,16 +47,15 @@ const Step2LessonGeneration = () => {
 
             <h3>Select Topics</h3>
             {selectedTopics.map((topic, index) => (
-                <div key={index}>
-                    <label>
-                        <input
-                            type="checkbox"
-                            checked={topic.selected}
-                            onChange={() => toggleTopicSelection(index)}
-                        />
-                        {topic.name}
-                    </label>
-                </div>
+                <label key={index} style={{ display: 'flex', alignItems: 'center', marginBottom: '8px', marginTop: '8px' }}>
+                    <input
+                        type="checkbox"
+                        checked={topic.selected}
+                        onChange={() => toggleTopicSelection(index)}
+                        style={{ marginRight: '8px', width: '20px'}}
+                    />
+                    {topic.name}
+                </label>
             ))}
 
             <h3>Lesson Preference</h3>
@@ -75,7 +63,7 @@ const Step2LessonGeneration = () => {
                 value={lessonPreference}
                 onChange={(e) => setLessonPreference(e.target.value)}
                 placeholder="Describe how you'd like the lesson to be..."
-                style={{ width: '100%', height: '100px' }}
+                style={{ width: '100%', height: '100px', marginBottom: '20px' }}
             />
 
             <button onClick={handleGenerateLesson} disabled={loading}>

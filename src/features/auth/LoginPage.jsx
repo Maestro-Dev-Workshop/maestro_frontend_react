@@ -52,6 +52,16 @@ export default function LoginPage() {
         </button>
         {status && <p className="text-center text-gray-700">{status}</p>}
       </form>
+
+      <div className="mt-4 text-center">
+        <p>Don't have an account?</p>
+        <button
+          onClick={() => navigate('/signup')}
+          className="mt-2 w-full bg-green-600 text-white p-2 rounded"
+        >
+          Sign Up
+        </button>
+      </div>
     </div>
   );
 }

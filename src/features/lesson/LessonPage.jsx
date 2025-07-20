@@ -44,7 +44,7 @@ const LessonPage = () => {
                 const topicContent = await getTopicContent(topicId);
                 setSubtopicsMap(prev => ({
                     ...prev,
-                    [topicId]: topicContent.sub_topics || []
+                    [topicId]: topicContent.subtopics || []
                 }));
             } catch (error) {
                 console.error('Failed to load subtopics:', error);
@@ -65,6 +65,18 @@ const LessonPage = () => {
         navigate(`/session/${session_id}/lesson/exam`);
     };
 
+    const selectedTopic = topics.find(t => t.id === expandedTopic);
+
+    const metadata = {
+        topic_name: selectedTopic?.title || null,
+        topic_id: selectedTopic?.id || null,
+        sub_topic_name: null,
+        sub_topic_id: null,
+        exercise_id: null,
+        exam_id: null,
+        question_id: null
+    };
+
     return (
         <div style={{ display: 'flex', height: '100vh' }}>
             {/* Sidebar */}
@@ -74,6 +86,19 @@ const LessonPage = () => {
                 padding: '15px',
                 overflowY: 'auto'
             }}>
+                <button
+                    onClick={() => navigate('/dashboard')}
+                    style={{
+                        width: '100%',
+                        marginBottom: '20px',
+                        padding: '10px',
+                        backgroundColor: '#000000',
+                        fontWeight: 'bold'
+                    }}
+                >
+                    ← Back to Dashboard
+                </button>
+
                 <h3>Session Navigation</h3>
                 {loading ? (
                     <p>Loading topics...</p>
@@ -107,7 +132,7 @@ const LessonPage = () => {
                                             <button
                                                 style={{
                                                     width: '100%',
-                                                    marginTop: '10px',
+                                                    marginBottom: '10px',
                                                     fontWeight: 'bold'
                                                 }}
                                                 onClick={() => handleExerciseClick(topic.id)}
@@ -125,7 +150,7 @@ const LessonPage = () => {
                                     width: '100%',
                                     marginTop: '20px',
                                     fontWeight: 'bold',
-                                    background: '#eee'
+                                    // background: '#eee'
                                 }}
                                 onClick={handleExamClick}
                             >
@@ -157,7 +182,7 @@ const LessonPage = () => {
                     backgroundColor: '#f9f9f9',
                     overflowY: 'auto'
                 }}>
-                    <ChatbotSidebar sessionId={session_id} metadata={{}} />
+                    <ChatbotSidebar sessionId={session_id} metadata={metadata} />
                 </div>
             )}
         </div>

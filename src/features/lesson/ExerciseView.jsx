@@ -12,6 +12,8 @@ const ExerciseView = () => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [submitted, setSubmitted] = useState(false);
     const [score, setScore] = useState(null);
+    const [questionCorrectness, setQuestionCorrectness] = useState({});
+    const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
         const fetchExercise = async () => {
@@ -50,41 +52,56 @@ const ExerciseView = () => {
 
     const handleSubmit = async () => {
         if (!exercise?.questions?.length) return;
-    
+
+        setSubmitting(true);
         let correct = 0;
-    
+        const correctnessMap = {};
+
         for (const q of exercise.questions) {
             const userAnswer = answers[q.id];
-    
+
             if (q.type === 'multiple choice') {
                 const correctOption = q.options.find(opt => opt.correct);
-                if (userAnswer === correctOption?.text) correct++;
+                const isCorrect = userAnswer === correctOption?.text;
+                if (isCorrect) correct++;
+                correctnessMap[q.id] = isCorrect;
             }
-    
+
             if (q.type === 'multiple selection') {
                 const correctAnswers = q.options.filter(opt => opt.correct).map(opt => opt.text).sort();
                 const userAnswers = Array.isArray(userAnswer) ? userAnswer.sort() : [];
-                if (JSON.stringify(correctAnswers) === JSON.stringify(userAnswers)) correct++;
-            }            
-    
+                const isCorrect = JSON.stringify(correctAnswers) === JSON.stringify(userAnswers);
+                if (isCorrect) correct++;
+                correctnessMap[q.id] = isCorrect;
+            }
+
             if (q.type === 'essay') {
                 try {
                     const essayScore = await scoreEssayAnswer(q.id, userAnswer);
-                    if (essayScore?.result.correct) correct++; // Adjust according to backend response
+                    const isCorrect = essayScore?.result.correct;
+                    if (isCorrect) correct++;
+                    correctnessMap[q.id] = {
+                        correct: isCorrect,
+                        feedback: essayScore?.result.feedback
+                    };
                 } catch (err) {
                     console.error('Essay scoring failed', err);
+                    correctnessMap[q.id] = { correct: false, feedback: 'Error scoring essay.' };
                 }
             }
         }
-    
+        setQuestionCorrectness(correctnessMap);
         setScore(correct);
         setSubmitted(true);
-    
+
         try {
+            console.log(`Saving score for topic ${topic_id}, exercise ${exercise.exercise_id}, score ${correct}`);
             await saveExerciseScore(topic_id, exercise.exercise_id, correct);
             alert(`Exercise submitted. Score: ${correct}`);
         } catch (err) {
             alert('Failed to save exercise score.');
+        } finally {
+            setSubmitting(false);
         }
     };
 
@@ -103,13 +120,13 @@ const ExerciseView = () => {
     const currentQuestion = exercise.questions[currentIndex];
 
     return (
-        <div>
-            <h2>Exercise: Question {currentIndex + 1} of {exercise.questions.length}</h2>
-            <p><strong>{currentQuestion.text}</strong></p>
+        <div style={{ padding: '20px' }}>
+            <h2 style={{ marginBottom: '15px' }}>Exercise: Question {currentIndex + 1} of {exercise.questions.length}</h2>
+            <p style={{ fontWeight: 'bold', marginBottom: '10px' }}>{currentQuestion.text}</p>
 
             {currentQuestion.type === 'multiple choice' && (
                 currentQuestion.options.map((opt, idx) => (
-                    <div key={idx}>
+                    <label key={idx} style={{ display: 'flex', alignItems: 'center', marginBottom: '8px', marginTop: '8px' }}>
                         <input
                             type="radio"
                             name={`q-${currentQuestion.id}`}
@@ -117,15 +134,16 @@ const ExerciseView = () => {
                             checked={answers[currentQuestion.id] === opt.text}
                             onChange={() => handleAnswerChange(currentQuestion.id, opt.text, currentQuestion.type)}
                             disabled={submitted}
+                            style={{ marginRight: '8px', width: '20px' }}
                         />
-                        <label>{opt.text}</label>
-                    </div>
+                        {opt.text}
+                    </label>
                 ))
             )}
 
             {currentQuestion.type === 'multiple selection' && (
                 currentQuestion.options.map((opt, idx) => (
-                    <div key={idx}>
+                    <label key={idx} style={{ display: 'flex', alignItems: 'center', marginBottom: '8px', marginTop: '8px' }}>
                         <input
                             type="checkbox"
                             name={`q-${currentQuestion.id}`}
@@ -133,20 +151,50 @@ const ExerciseView = () => {
                             checked={(answers[currentQuestion.id] || []).includes(opt.text)}
                             onChange={() => handleAnswerChange(currentQuestion.id, opt.text, currentQuestion.type)}
                             disabled={submitted}
+                            style={{ marginRight: '8px', width: '20px' }}
                         />
-                        <label>{opt.text}</label>
-                    </div>
+                        {opt.text}
+                    </label>
                 ))
             )}
 
             {currentQuestion.type === 'essay' && (
                 <textarea
                     rows="5"
-                    style={{ width: '100%' }}
+                    style={{ width: '100%', marginBottom: '15px' }}
                     value={answers[currentQuestion.id] || ''}
                     onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value, currentQuestion.type)}
                     disabled={submitted}
                 />
+            )}
+
+            {submitted && (
+                <p style={{ marginTop: '10px', fontWeight: 'bold', color: (questionCorrectness[currentQuestion.id]?.correct || questionCorrectness[currentQuestion.id] === true) ? 'green' : 'red' }}>
+                    {(questionCorrectness[currentQuestion.id]?.correct || questionCorrectness[currentQuestion.id] === true) ? 'Correct' : 'Incorrect'}
+                </p>
+            )}
+
+            {submitted && currentQuestion.type === 'multiple choice' && (
+                <p style={{ fontStyle: 'italic', marginTop: '5px' }}>
+                    Explanation: {currentQuestion.options.find(opt => opt.correct)?.explanation}
+                </p>
+            )}
+
+            {submitted && currentQuestion.type === 'multiple selection' && (
+                <div style={{ fontStyle: 'italic', marginTop: '5px' }}>
+                    <p><strong>Explanations:</strong></p>
+                    {currentQuestion.options.map((opt, idx) => (
+                        <p key={idx} style={{ marginBottom: '5px' }}>
+                            <span style={{ fontWeight: 'bold' }}>{opt.text}:</span> {opt.explanation}
+                        </p>
+                    ))}
+                </div>
+            )}
+
+            {submitted && currentQuestion.type === 'essay' && (
+                <p style={{ fontStyle: 'italic', marginTop: '5px' }}>
+                    Feedback: {questionCorrectness[currentQuestion.id]?.feedback}
+                </p>
             )}
 
             <div style={{ marginTop: '20px' }}>
@@ -162,13 +210,15 @@ const ExerciseView = () => {
 
             {!submitted && (
                 <div style={{ marginTop: '20px' }}>
-                    <button onClick={handleSubmit}>Submit Exercise</button>
+                    <button onClick={handleSubmit} disabled={submitting}>
+                        {submitting ? 'Submitting...' : 'Submit Exercise'}
+                    </button>
                 </div>
             )}
 
             {score !== null && (
                 <div style={{ marginTop: '20px' }}>
-                    <p><strong>Score: {score}</strong></p>
+                    <p style={{ fontWeight: 'bold' }}>Score: {score}</p>
                     <button onClick={() => navigate(`/lesson/${session_id}`)}>Back to Lesson Overview</button>
                 </div>
             )}

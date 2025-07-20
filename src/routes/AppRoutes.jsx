@@ -38,7 +38,7 @@ export default function AppRoutes() {
 
             {/* Lesson */}
             <Route path="/session/:session_id/lesson" element={<LessonPage />}>
-              <Route path="topic/:topic_id/subtopic/:sub_topic_id" element={<SubtopicView />} />
+              <Route path="topic/:topic_id/subtopic/:subtopic_id" element={<SubtopicView />} />
               <Route path="topic/:topic_id/exercise" element={<ExerciseView />} />
               <Route path="exam" element={<ExamView />} />
             </Route>

@@ -45,7 +45,7 @@ const Step3QuestionGeneration = () => {
             }
 
             alert('Exercises and/or exam generated successfully!');
-            navigate(`/lesson/${session_id}`);
+            navigate(`/session/${session_id}/lesson`);
         } catch (err) {
             alert('Error generating questions');
         } finally {
@@ -60,8 +60,8 @@ const Step3QuestionGeneration = () => {
             {/* Exercise Section */}
             <section style={{ marginBottom: '20px' }}>
                 <h2>Exercises</h2>
-                <label>
-                    <input type="checkbox" checked={includeExercises} onChange={(e) => setIncludeExercises(e.target.checked)} />
+                <label style={{ display: 'flex', alignItems: 'center', marginBottom: '8px', marginTop: '8px' }}>
+                    <input type="checkbox" checked={includeExercises} onChange={(e) => setIncludeExercises(e.target.checked)} style={{ marginRight: '8px', width: '20px'}} />
                     Include Exercises
                 </label>
                 {includeExercises && (
@@ -73,27 +73,31 @@ const Step3QuestionGeneration = () => {
                             style={{ width: '100%', height: '60px' }}
                         />
                         <div style={{ marginTop: '10px' }}>
-                            <label>
+                            <h3>Question Types</h3>
+                            <label style={{ display: 'flex', alignItems: 'center', marginBottom: '8px', marginTop: '8px' }}>
                                 <input
                                     type="checkbox"
                                     checked={exerciseQuestionTypes.includes('multiple choice')}
                                     onChange={() => handleCheckboxChange(setExerciseQuestionTypes, exerciseQuestionTypes, 'multiple choice')}
+                                    style={{ marginRight: '8px', width: '20px'}}
                                 />
                                 Multiple Choice
                             </label>
-                            <label style={{ marginLeft: '10px' }}>
+                            <label style={{ display: 'flex', alignItems: 'center', marginBottom: '8px', marginTop: '8px' }}>
                                 <input
                                     type="checkbox"
                                     checked={exerciseQuestionTypes.includes('multiple selection')}
                                     onChange={() => handleCheckboxChange(setExerciseQuestionTypes, exerciseQuestionTypes, 'multiple selection')}
+                                    style={{ marginRight: '8px', width: '20px'}}
                                 />
                                 Multiple Selection
                             </label>
-                            <label style={{ marginLeft: '10px' }}>
+                            <label style={{ display: 'flex', alignItems: 'center', marginBottom: '8px', marginTop: '8px' }}>
                                 <input
                                     type="checkbox"
                                     checked={exerciseQuestionTypes.includes('essay')}
                                     onChange={() => handleCheckboxChange(setExerciseQuestionTypes, exerciseQuestionTypes, 'essay')}
+                                    style={{ marginRight: '8px', width: '20px'}}
                                 />
                                 Essay
                             </label>
@@ -105,8 +109,8 @@ const Step3QuestionGeneration = () => {
             {/* Exam Section */}
             <section style={{ marginBottom: '20px' }}>
                 <h2>Exam</h2>
-                <label>
-                    <input type="checkbox" checked={includeExam} onChange={(e) => setIncludeExam(e.target.checked)} />
+                <label style={{ display: 'flex', alignItems: 'center', marginBottom: '8px', marginTop: '8px' }}>
+                    <input type="checkbox" checked={includeExam} onChange={(e) => setIncludeExam(e.target.checked)} style={{ marginRight: '8px', width: '20px'}} />
                     Include Exam
                 </label>
                 {includeExam && (
@@ -118,35 +122,40 @@ const Step3QuestionGeneration = () => {
                             style={{ width: '100%', height: '60px' }}
                         />
                         <div style={{ marginTop: '10px' }}>
-                            <label>
+                            <h3>Question Types</h3>
+                            <label style={{ display: 'flex', alignItems: 'center', marginBottom: '8px', marginTop: '8px' }}>
                                 <input
                                     type="checkbox"
                                     checked={examQuestionTypes.includes('multiple choice')}
                                     onChange={() => handleCheckboxChange(setExamQuestionTypes, examQuestionTypes, 'multiple choice')}
+                                    style={{ marginRight: '8px', width: '20px'}}
                                 />
                                 Multiple Choice
                             </label>
-                            <label style={{ marginLeft: '10px' }}>
+                            <label style={{ display: 'flex', alignItems: 'center', marginBottom: '8px', marginTop: '8px' }}>
                                 <input
                                     type="checkbox"
                                     checked={examQuestionTypes.includes('multiple selection')}
                                     onChange={() => handleCheckboxChange(setExamQuestionTypes, examQuestionTypes, 'multiple selection')}
+                                    style={{ marginRight: '8px', width: '20px'}}
                                 />
                                 Multiple Selection
                             </label>
-                            <label style={{ marginLeft: '10px' }}>
+                            <label style={{ display: 'flex', alignItems: 'center', marginBottom: '8px', marginTop: '8px' }}>
                                 <input
                                     type="checkbox"
                                     checked={examQuestionTypes.includes('essay')}
                                     onChange={() => handleCheckboxChange(setExamQuestionTypes, examQuestionTypes, 'essay')}
+                                    style={{ marginRight: '8px', width: '20px'}}
                                 />
                                 Essay
                             </label>
                         </div>
                         <div style={{ marginTop: '10px' }}>
-                            <label>
-                                <input type="checkbox" checked={useTimeLimit} onChange={(e) => setUseTimeLimit(e.target.checked)} />
-                                Add time limit to exam
+                            <h3>Time Limit</h3>
+                            <label style={{ display: 'flex', alignItems: 'center', marginBottom: '8px', marginTop: '8px' }}>
+                                <input type="checkbox" checked={useTimeLimit} onChange={(e) => setUseTimeLimit(e.target.checked)} style={{ marginRight: '8px', width: '20px'}} />
+                                Add time limit to exam?
                             </label>
                         </div>
                     </div>

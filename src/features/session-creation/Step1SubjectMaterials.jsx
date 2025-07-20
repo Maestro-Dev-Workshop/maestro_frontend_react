@@ -16,8 +16,8 @@ const Step1SubjectMaterials = () => {
         if (!sessionName.trim()) return alert('Please enter a session name');
         setCreating(true);
         try {
-            const { session_id } = await createSession(sessionName.trim());
-            setSessionId(session_id);
+            const { session } = await createSession(sessionName.trim());
+            setSessionId(session.id);
             alert('Session created!');
         } catch (err) {
             alert('Error creating session');
@@ -38,7 +38,7 @@ const Step1SubjectMaterials = () => {
         try {
             await uploadDocuments(sessionId, files);
             alert('Files uploaded!');
-            await handleLabeling();
+            setFiles([]);  // reset files after upload
         } catch (err) {
             alert('Error uploading files');
         } finally {
@@ -46,22 +46,29 @@ const Step1SubjectMaterials = () => {
         }
     };
 
-    const handleLabeling = async () => {
+    const handleProceed = async () => {
+        if (!sessionId) return alert('Session not created.');
         setLabeling(true);
         try {
             const data = await labelDocuments(sessionId);
-            setTopics(data.topics_identified || []);
+            const result = data.result || [];
+    
+            // Flatten all topics across documents and deduplicate
+            const topicsSet = new Set();
+            result.forEach(doc => {
+                (doc.topics_found || []).forEach(topic => topicsSet.add(topic));
+            });
+            const uniqueTopics = Array.from(topicsSet);
+    
+            setTopics(uniqueTopics);
             alert('Labeling complete!');
+            navigate(`/session/create/step-2/${sessionId}`, { state: { topics: uniqueTopics } });
         } catch (err) {
+            console.error('Labelling error:', err);
             alert('Error labeling documents');
         } finally {
             setLabeling(false);
         }
-    };
-
-    const handleProceed = () => {
-        if (topics.length === 0) return alert('Label documents first.');
-        navigate(`/session-creation/${sessionId}/step-2`, { state: { topics } });
     };
 
     return (
@@ -85,26 +92,20 @@ const Step1SubjectMaterials = () => {
             {sessionId && (
                 <>
                     <div style={{ marginBottom: '20px' }}>
-                        <h3>Upload Materials</h3>
+                        <h3>Upload Materials (You can upload multiple times)</h3>
                         <input type="file" multiple onChange={handleFileChange} />
                         <button onClick={handleUpload} disabled={uploading}>
-                            {uploading ? 'Uploading...' : 'Upload & Label'}
+                            {uploading ? 'Uploading...' : 'Upload Files'}
                         </button>
                     </div>
 
-                    {labeling && <p>Labeling documents...</p>}
-
-                    {topics.length > 0 && (
-                        <>
-                            <h3>Identified Topics:</h3>
-                            <ul>
-                                {topics.map((topic, idx) => (
-                                    <li key={idx}>{topic}</li>
-                                ))}
-                            </ul>
-                            <button onClick={handleProceed}>Proceed to Step 2</button>
-                        </>
-                    )}
+                    <button
+                        onClick={handleProceed}
+                        disabled={labeling}
+                        style={{ marginTop: '20px', fontWeight: 'bold' }}
+                    >
+                        {labeling ? 'Labelling...' : 'Proceed to Step 2 (Label Documents)'}
+                    </button>
                 </>
             )}
         </div>

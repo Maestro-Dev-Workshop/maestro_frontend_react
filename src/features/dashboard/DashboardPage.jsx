@@ -1,6 +1,6 @@
 // src/features/dashboard/DashboardPage.jsx
 import React, { useEffect, useState } from 'react';
-import { getSessions } from './dashboardService';
+import { getSessions, logout } from './dashboardService';
 import { useNavigate } from 'react-router-dom';
 
 const DashboardPage = () => {
@@ -32,11 +32,23 @@ const DashboardPage = () => {
         navigate(`/session/${session.id}/lesson`);
     };
 
+    const handleLogout = async () => {
+        try {
+            await logout();
+            navigate('/login');
+        } catch (err) {
+            alert('Failed to logout');
+        }
+    };
+
     if (loading) return <p>Loading sessions...</p>;
 
     return (
         <div style={{ padding: '20px' }}>
-            <h1>Dashboard</h1>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+                <h1>Dashboard</h1>
+                <button onClick={handleLogout}>Logout</button>
+            </div>
 
             <button onClick={handleStartSessionCreation} style={{ marginBottom: '20px' }}>
                 Create New Session
