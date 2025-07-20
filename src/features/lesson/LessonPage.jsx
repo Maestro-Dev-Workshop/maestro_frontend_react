@@ -13,6 +13,7 @@ const LessonPage = () => {
     const [expandedTopic, setExpandedTopic] = useState(null);
     const [showChat, setShowChat] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [childMetadata, setChildMetadata] = useState(null);
 
     useEffect(() => {
         const fetchTopics = async () => {
@@ -67,7 +68,7 @@ const LessonPage = () => {
 
     const selectedTopic = topics.find(t => t.id === expandedTopic);
 
-    const metadata = {
+    const defaultMetadata = {
         topic_name: selectedTopic?.title || null,
         topic_id: selectedTopic?.id || null,
         sub_topic_name: null,
@@ -76,6 +77,8 @@ const LessonPage = () => {
         exam_id: null,
         question_id: null
     };
+
+    const metadata = childMetadata || defaultMetadata;
 
     return (
         <div style={{ display: 'flex', height: '100vh' }}>
@@ -93,7 +96,8 @@ const LessonPage = () => {
                         marginBottom: '20px',
                         padding: '10px',
                         backgroundColor: '#000000',
-                        fontWeight: 'bold'
+                        fontWeight: 'bold',
+                        color: '#ffffff'
                     }}
                 >
                     ← Back to Dashboard
@@ -149,8 +153,7 @@ const LessonPage = () => {
                                 style={{
                                     width: '100%',
                                     marginTop: '20px',
-                                    fontWeight: 'bold',
-                                    // background: '#eee'
+                                    fontWeight: 'bold'
                                 }}
                                 onClick={handleExamClick}
                             >
@@ -170,7 +173,11 @@ const LessonPage = () => {
 
             {/* Main Content */}
             <div style={{ flex: 1, padding: '20px', overflowY: 'auto' }}>
-                <Outlet />
+                <Outlet context={{
+                    topic_name: selectedTopic?.title || null,
+                    topic_id: selectedTopic?.id || null,
+                    setChildMetadata
+                }} />
             </div>
 
             {/* Chatbot Sidebar */}

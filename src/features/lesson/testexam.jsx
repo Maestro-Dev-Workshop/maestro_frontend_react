@@ -1,14 +1,13 @@
-// src/features/lesson/ExerciseView.jsx
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useOutletContext } from 'react-router-dom';
-import { getExercise, saveExerciseScore, scoreEssayAnswer } from './lessonService';
+import { getExam, saveExamScore, scoreEssayAnswer } from './lessonService';
 
-const ExerciseView = () => {
-    const { session_id, topic_id } = useParams();
-    const { topic_name, topic_id: contextTopicId, setChildMetadata } = useOutletContext();
+const ExamView = () => {
+    const { session_id } = useParams();
+    const { topic_name, topic_id } = useOutletContext();
     const navigate = useNavigate();
 
-    const [exercise, setExercise] = useState(null);
+    const [exam, setExam] = useState(null);
     const [loading, setLoading] = useState(true);
     const [answers, setAnswers] = useState({});
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -18,20 +17,20 @@ const ExerciseView = () => {
     const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
-        const fetchExercise = async () => {
+        const fetchExam = async () => {
             setLoading(true);
             try {
-                const data = await getExercise(topic_id);
-                setExercise(data.exercise);
+                const data = await getExam(session_id);
+                setExam(data.exam);
             } catch (error) {
-                alert('Failed to load exercise');
+                alert('Failed to load exam');
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchExercise();
-    }, [session_id, topic_id]);
+        fetchExam();
+    }, [session_id]);
 
     const handleAnswerChange = (questionId, value, type) => {
         if (type === 'multiple selection') {
@@ -52,27 +51,14 @@ const ExerciseView = () => {
         }
     };
 
-    useEffect(() => {
-        const metadata = {
-            topic_name: topic_name || null,
-            topic_id: contextTopicId || null,
-            sub_topic_name: null,
-            sub_topic_id: null,
-            exercise_id: exercise?.exercise_id || null,
-            exam_id: null,
-            question_id: exercise?.questions?.[currentIndex]?.id || null
-        };
-        setChildMetadata && setChildMetadata(metadata);
-    }, [topic_name, contextTopicId, exercise, currentIndex, setChildMetadata]);
-
     const handleSubmit = async () => {
-        if (!exercise?.questions?.length) return;
-
+        if (!exam?.questions?.length) return;
         setSubmitting(true);
+
         let correct = 0;
         const correctnessMap = {};
 
-        for (const q of exercise.questions) {
+        for (const q of exam.questions) {
             const userAnswer = answers[q.id];
 
             if (q.type === 'multiple choice') {
@@ -105,16 +91,16 @@ const ExerciseView = () => {
                 }
             }
         }
+
         setQuestionCorrectness(correctnessMap);
         setScore(correct);
         setSubmitted(true);
 
         try {
-            console.log(`Saving score for topic ${topic_id}, exercise ${exercise.exercise_id}, score ${correct}`);
-            await saveExerciseScore(topic_id, exercise.exercise_id, correct);
-            alert(`Exercise submitted. Score: ${correct}`);
+            await saveExamScore(session_id, exam.exam_id, correct);
+            alert(`Exam submitted. Score: ${correct} / ${exam.questions.length}`);
         } catch (err) {
-            alert('Failed to save exercise score.');
+            alert('Failed to save exam score.');
         } finally {
             setSubmitting(false);
         }
@@ -124,20 +110,29 @@ const ExerciseView = () => {
         setCurrentIndex((prev) => {
             const next = direction === 'next' ? prev + 1 : prev - 1;
             if (next < 0) return 0;
-            if (next >= exercise.questions.length) return exercise.questions.length - 1;
+            if (next >= exam.questions.length) return exam.questions.length - 1;
             return next;
         });
     };
 
-    if (loading) return <p>Loading exercise...</p>;
-    if (!exercise) return <p>No exercise found.</p>;
+    if (loading) return <p>Loading exam...</p>;
+    if (!exam) return <p>No exam found.</p>;
 
-    const currentQuestion = exercise.questions[currentIndex];
+    const currentQuestion = exam.questions[currentIndex];
+    const metadata = {
+        topic_name,
+        topic_id,
+        sub_topic_name: null,
+        sub_topic_id: null,
+        exercise_id: null,
+        exam_id: exam?.exam_id || null,
+        question_id: exam?.questions?.[currentIndex]?.id || null
+    };
 
     return (
-        <div style={{ padding: '20px' }}>
-            <h2 style={{ marginBottom: '15px' }}>Exercise: Question {currentIndex + 1} of {exercise.questions.length}</h2>
-            <p style={{ fontWeight: 'bold', marginBottom: '10px' }}>{currentQuestion.text}</p>
+        <div>
+            <h2>Exam: Question {currentIndex + 1} of {exam.questions.length}</h2>
+            <p><strong>{currentQuestion.text}</strong></p>
 
             {currentQuestion.type === 'multiple choice' && (
                 currentQuestion.options.map((opt, idx) => (
@@ -176,7 +171,7 @@ const ExerciseView = () => {
             {currentQuestion.type === 'essay' && (
                 <textarea
                     rows="5"
-                    style={{ width: '100%', marginBottom: '15px' }}
+                    style={{ width: '100%' }}
                     value={answers[currentQuestion.id] || ''}
                     onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value, currentQuestion.type)}
                     disabled={submitted}
@@ -187,9 +182,24 @@ const ExerciseView = () => {
                 <p style={{
                     marginTop: '10px',
                     fontWeight: 'bold',
-                    color: (questionCorrectness[currentQuestion.id]?.correct || questionCorrectness[currentQuestion.id] === true) ? 'green' : 'red'
+                    color:
+                        currentQuestion.type === 'essay'
+                            ? questionCorrectness[currentQuestion.id]?.correct
+                                ? 'green'
+                                : 'red'
+                            : questionCorrectness[currentQuestion.id]
+                                ? 'green'
+                                : 'red'
                 }}>
-                    {(questionCorrectness[currentQuestion.id]?.correct || questionCorrectness[currentQuestion.id] === true) ? 'Correct' : 'Incorrect'}
+                    {
+                        currentQuestion.type === 'essay'
+                            ? questionCorrectness[currentQuestion.id]?.correct
+                                ? 'Correct'
+                                : 'Incorrect'
+                            : questionCorrectness[currentQuestion.id]
+                                ? 'Correct'
+                                : 'Incorrect'
+                    }
                 </p>
             )}
 
@@ -219,7 +229,7 @@ const ExerciseView = () => {
             <div style={{ marginTop: '20px' }}>
                 <button disabled={currentIndex === 0} onClick={() => handleNavigation('prev')}>Previous</button>
                 <button
-                    disabled={currentIndex === exercise.questions.length - 1}
+                    disabled={currentIndex === exam.questions.length - 1}
                     onClick={() => handleNavigation('next')}
                     style={{ marginLeft: '10px' }}
                 >
@@ -230,14 +240,14 @@ const ExerciseView = () => {
             {!submitted && (
                 <div style={{ marginTop: '20px' }}>
                     <button onClick={handleSubmit} disabled={submitting}>
-                        {submitting ? 'Submitting...' : 'Submit Exercise'}
+                        {submitting ? 'Submitting...' : 'Submit Exam'}
                     </button>
                 </div>
             )}
 
             {score !== null && (
                 <div style={{ marginTop: '20px' }}>
-                    <p style={{ fontWeight: 'bold' }}>Score: {score}</p>
+                    <p><strong>Score: {score} / {exam.questions.length}</strong></p>
                     <button onClick={() => navigate(`/lesson/${session_id}`)}>Back to Lesson Overview</button>
                 </div>
             )}
@@ -245,4 +255,4 @@ const ExerciseView = () => {
     );
 };
 
-export default ExerciseView;
+export default ExamView;

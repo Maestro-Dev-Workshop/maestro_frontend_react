@@ -1,9 +1,11 @@
+// src/features/lesson/ExamView.jsx
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useOutletContext } from 'react-router-dom';
 import { getExam, saveExamScore, scoreEssayAnswer } from './lessonService';
 
 const ExamView = () => {
     const { session_id } = useParams();
+    const { topic_name, topic_id, setChildMetadata } = useOutletContext();
     const navigate = useNavigate();
 
     const [exam, setExam] = useState(null);
@@ -49,6 +51,19 @@ const ExamView = () => {
             setAnswers({ ...answers, [questionId]: value });
         }
     };
+
+    useEffect(() => {
+        const metadata = {
+            topic_name: topic_name || null,
+            topic_id: topic_id || null,
+            sub_topic_name: null,
+            sub_topic_id: null,
+            exercise_id: null,
+            exam_id: exam?.exam_id || null,
+            question_id: exam?.questions?.[currentIndex]?.id || null
+        };
+        setChildMetadata && setChildMetadata(metadata);
+    }, [topic_name, topic_id, exam, currentIndex, setChildMetadata]);
 
     const handleSubmit = async () => {
         if (!exam?.questions?.length) return;

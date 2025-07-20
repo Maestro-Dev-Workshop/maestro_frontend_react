@@ -1,11 +1,10 @@
-// src/features/lesson/ExerciseView.jsx
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useOutletContext } from 'react-router-dom';
 import { getExercise, saveExerciseScore, scoreEssayAnswer } from './lessonService';
 
 const ExerciseView = () => {
     const { session_id, topic_id } = useParams();
-    const { topic_name, topic_id: contextTopicId, setChildMetadata } = useOutletContext();
+    const { topic_name, topic_id: contextTopicId } = useOutletContext();
     const navigate = useNavigate();
 
     const [exercise, setExercise] = useState(null);
@@ -51,19 +50,6 @@ const ExerciseView = () => {
             setAnswers({ ...answers, [questionId]: value });
         }
     };
-
-    useEffect(() => {
-        const metadata = {
-            topic_name: topic_name || null,
-            topic_id: contextTopicId || null,
-            sub_topic_name: null,
-            sub_topic_id: null,
-            exercise_id: exercise?.exercise_id || null,
-            exam_id: null,
-            question_id: exercise?.questions?.[currentIndex]?.id || null
-        };
-        setChildMetadata && setChildMetadata(metadata);
-    }, [topic_name, contextTopicId, exercise, currentIndex, setChildMetadata]);
 
     const handleSubmit = async () => {
         if (!exercise?.questions?.length) return;
@@ -133,6 +119,15 @@ const ExerciseView = () => {
     if (!exercise) return <p>No exercise found.</p>;
 
     const currentQuestion = exercise.questions[currentIndex];
+    const metadata = {
+        topic_name: topic_name || null,
+        topic_id: contextTopicId || null,
+        sub_topic_name: null,
+        sub_topic_id: null,
+        exercise_id: exercise?.exercise_id || null,
+        exam_id: null,
+        question_id: exercise?.questions?.[currentIndex]?.id || null
+    };
 
     return (
         <div style={{ padding: '20px' }}>
@@ -184,11 +179,7 @@ const ExerciseView = () => {
             )}
 
             {submitted && (
-                <p style={{
-                    marginTop: '10px',
-                    fontWeight: 'bold',
-                    color: (questionCorrectness[currentQuestion.id]?.correct || questionCorrectness[currentQuestion.id] === true) ? 'green' : 'red'
-                }}>
+                <p style={{ marginTop: '10px', fontWeight: 'bold', color: (questionCorrectness[currentQuestion.id]?.correct || questionCorrectness[currentQuestion.id] === true) ? 'green' : 'red' }}>
                     {(questionCorrectness[currentQuestion.id]?.correct || questionCorrectness[currentQuestion.id] === true) ? 'Correct' : 'Incorrect'}
                 </p>
             )}

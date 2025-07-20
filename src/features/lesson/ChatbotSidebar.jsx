@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { getChatHistory, sendChatMessage } from './lessonService';
+import ReactMarkdown from 'react-markdown';
 
 const ChatbotSidebar = ({ sessionId, metadata = {} }) => {
     const [messages, setMessages] = useState([]);
@@ -70,7 +71,7 @@ const ChatbotSidebar = ({ sessionId, metadata = {} }) => {
                                 maxWidth: '80%',
                             }}
                         >
-                            {msg.content}
+                            <ReactMarkdown>{msg.content}</ReactMarkdown>
                         </div>
                     </div>
                 ))}
