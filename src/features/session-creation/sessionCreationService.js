@@ -23,7 +23,7 @@ export const selectTopics = async (sessionId, topics) => {
 };
 
 export const generateLesson = async (sessionId, lessonPreference) => {
-    // const data = new URLSearchParams();
+    const data = new URLSearchParams();
     const response = await api.post(`/session/${sessionId}/generate-lesson`, { lesson_preference: lessonPreference });
     return response.data;
 };
