@@ -84,7 +84,7 @@ const LessonPage = () => {
         <div style={{ display: 'flex', height: '100vh' }}>
             {/* Sidebar */}
             <div style={{
-                width: '250px',
+                width: '17.5%',
                 borderRight: '1px solid #ccc',
                 padding: '15px',
                 overflowY: 'auto'
@@ -183,7 +183,7 @@ const LessonPage = () => {
             {/* Chatbot Sidebar */}
             {showChat && (
                 <div style={{
-                    width: '350px',
+                    width: '30%',
                     borderLeft: '1px solid #ccc',
                     padding: '15px',
                     backgroundColor: '#f9f9f9',
