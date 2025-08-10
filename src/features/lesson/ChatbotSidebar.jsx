@@ -39,6 +39,7 @@ const ChatbotSidebar = ({ sessionId, metadata = {} }) => {
             setMessages(prev => [...prev, botMessage]);
         } catch (err) {
             console.error('Chatbot error', err);
+            console.log(metadata);
             const errorMessage = { role: 'bot', content: 'Failed to get a response.' };
             setMessages(prev => [...prev, errorMessage]);
         } finally {

@@ -131,6 +131,9 @@ const ExerciseView = () => {
 
     if (loading) return <p>Loading exercise...</p>;
     if (!exercise) return <p>No exercise found.</p>;
+    if (!exercise.questions || exercise.questions.length === 0) {
+        return <p>No questions exist for this exercise.</p>;
+    }
 
     const currentQuestion = exercise.questions[currentIndex];
 

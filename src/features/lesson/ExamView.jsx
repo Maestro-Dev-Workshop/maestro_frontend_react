@@ -131,6 +131,9 @@ const ExamView = () => {
 
     if (loading) return <p>Loading exam...</p>;
     if (!exam) return <p>No exam found.</p>;
+    if (!exam.questions || exam.questions.length === 0) {
+        return <p>No questions exist for this exam.</p>;
+    }
 
     const currentQuestion = exam.questions[currentIndex];
 
