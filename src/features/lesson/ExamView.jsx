@@ -92,7 +92,7 @@ const ExamView = () => {
 
             if (q.type === 'essay') {
                 try {
-                    const essayScore = await scoreEssayAnswer(q.id, userAnswer);
+                    const essayScore = await scoreEssayAnswer(session_id, q.id, userAnswer);
                     const isCorrect = essayScore?.result.correct;
                     if (isCorrect) correct++;
                     correctnessMap[q.id] = {

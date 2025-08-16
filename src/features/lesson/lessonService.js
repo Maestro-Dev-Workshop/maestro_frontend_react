@@ -51,8 +51,8 @@ export const sendChatMessage = async (session_id, message, metadata) => {
     return res.data;
 };
 
-export const scoreEssayAnswer = async (question_id, answer) => {
-    const res = await api.post('/chatbot/answer-question', { question_id, answer});
+export const scoreEssayAnswer = async (session_id, question_id, answer) => {
+    const res = await api.post('/chatbot/answer-question', { session_id, question_id, answer});
     return res.data;
 };
 
